@@ -8,5 +8,7 @@ const userRouter = require("./users/router");
 
 
 router.use("/users", userRouter);
+router.use("/movies", userRouter);
+router.use("/comments", userRouter);
 
 module.exports = router;

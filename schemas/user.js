@@ -13,7 +13,7 @@ const usersSchema = mongoose.Schema({
     language: { type: String, default: "en" },
     // movies_seen: Array,
     // following: Array,
-    password_token:  { type: String, default: null },
+    tokenPassword:  { type: String, default: null },
     // oauthID: String,
     // google: JSON,
     // twitter: JSON,

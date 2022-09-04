@@ -1,7 +1,6 @@
 const jwt = require("jsonwebtoken");
 const createError = require("http-errors");
 const bcrypt = require("bcrypt");
-require("colors");
 const User = require("../../schemas/user");
 
 
@@ -20,18 +19,18 @@ async function auth(req, res, next) {
         return next(createError(400, "email is a required property"));
 
     try {
-        
+
         // Recherche de l'utilisteur par son email en bdd
-        let user = await User.findOne({ email: req.body["email"] });
-        
-        // Retour d'un erreur 400 si le user n'existe pas
+        let user = await User.findOne( { email: req.body["email"].toLowerCase() } )
+
+        // Retour d'une erreur 400 si le user n'existe pas
         if (!user)
             return next(createError(400, "Invalid credentials"));
 
         // comparaison du mot de passe du user (deja crypté en bdd) et du mot de passe du body que l'ont crypte dans la fonction "compare"
         const valid = await bcrypt.compare(password, user.password);
 
-        // Retour d'un erreur 400 si le mot de passer et faux
+        // Retour d'une erreur 400 si le mot de passe est faux
         if (!valid)
             return next(createError(400, "Invalid credentials"));
 
@@ -40,13 +39,21 @@ async function auth(req, res, next) {
             id: user.id,
             email: user.email,
             id_group_right_mams: user.id_group_right_mams
-        }, "My_s€cRet_kEy_098xxXXxx432", { expiresIn: "15h" });
-        
+        }, process.env.jwtSecret, { expiresIn: "24h" });
+
         // reponse du la requete
         return res.status(200).json({
             response: "ok",
-            "x-access-token": token,
-            user: user
+            data: {
+                id: user._id,
+                lastname: user.lastname,
+                firstname: user.firstname,
+                username: user.username,
+                email: user.email,
+                image: user.image,
+                language: user.language,
+                token
+            }
         });
     } catch (e) {
         console.error(e);

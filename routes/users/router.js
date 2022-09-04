@@ -8,10 +8,12 @@ const checkToken = require("../../middlewares/checkToken");
 
 const auth = require("./auth");
 const addUser = require("./addUser");
-const getUserImage = require('./getUserImage');
+const editUserData = require("./editUserData");
+const getAllUsers = require("./getAllUsers");
 
 router.post("/auth", auth);
 router.post("/add", addUser);
-router.get("/image", checkToken, getUserImage);
+router.put("/edit", checkToken, editUserData);
+router.get("/", checkToken, getAllUsers);
 
 module.exports = router;

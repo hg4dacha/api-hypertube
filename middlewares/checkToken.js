@@ -1,6 +1,7 @@
 const User = require("../schemas/user");
 const jwt = require("jsonwebtoken");
 const createError = require("http-errors");
+const mongoose = require("mongoose");
 
 async function checkToken(req, res, next) {
     
@@ -11,10 +12,9 @@ async function checkToken(req, res, next) {
 
     try {
 
-        const decoded = await jwt.verify(token, "My_s€cRet_kEy_098xxXXxx432");
-            
-        const user = await User.findOne({ email: decoded["email"] });
-
+        const decoded = await jwt.verify(token, process.env.jwtSecret);
+      	const idUser = mongoose.Types.ObjectId(decoded["id"]);
+        const user = await User.findOne({ _id: idUser });
         if (!user)
             return next(createError(401, "Account doesn't exist"));
 

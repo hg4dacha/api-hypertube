@@ -6,7 +6,27 @@ require("colors");
 const createError = require("http-errors");
 // const path = require("path");
 // const cookieParser = require("cookie-parser");
-// const cors = require("cors");
+const cors = require("cors");
+// Connexion to Database
+require('dotenv').config();
+const mongoose = require("mongoose");
+// mongoose.set("useNewUrlParser", true);
+// mongoose.set("useFindAndModify", false);
+// mongoose.set("useCreateIndex", true);
+// mongoose.set("useUnifiedTopology", true);
+mongoose.connect(
+  process.env.MONGO_URI,
+  {
+    useUnifiedTopology: true,
+    useNewUrlParser: true
+  }
+); 
+
+let db = mongoose.connection;
+db.on("error", console.error.bind(console, "connection error:"));
+db.once("open", () => {
+  console.log("Database connected!");
+});
 // const fileUpload = require("express-fileupload");
 // const morganMiddleware = require("./config/morgan");
 // const helmet = require("helmet");
@@ -67,7 +87,7 @@ const app = express();
  * Get port from environment and store in Express.
  */
 
- var port = normalizePort("3000");
+ var port = normalizePort("5000");
  app.set("port", port);
  
  /**
@@ -152,7 +172,7 @@ const app = express();
 
 
 
-
+app.use(cors());
 // app.set("trust proxy", true);
 // app.use(promMid({
 //     authenticate: (req) => {

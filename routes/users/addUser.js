@@ -9,24 +9,29 @@ const sanitize = require("mongo-sanitize");
 
 
 
-async function checkUserFields(data, req) {
+async function checkUserFields(data) {
 
-    let error;
-    if ((error = checkUserDataService.lastname(req.body.lastname))) return error;
-    if ((error = checkUserDataService.firstname(req.body.firstname))) return error;
-    if ((error = checkUserDataService.password(req.body.password))) return error;
-    if ((error = await checkUserDataService.username(req.body.username))) return error;
-    if ((error = await checkUserDataService.email(req.body.email))) return error;
-
-    return null;
+    try {
+        let error;
+        if ((error = checkUserDataService.lastname(data.lastname))) return error;
+        if ((error = checkUserDataService.firstname(data.firstname))) return error;
+        if ((error = await checkUserDataService.username(data.username))) return error;
+        if ((error = await checkUserDataService.email(data.email))) return error;
+        if ((error = checkUserDataService.password(data.password))) return error;
+        
+        return null;
+    }
+    catch(error) {
+        console.log(error);
+    }
 }
 
 
-async function addUser(req, res) {
-    
+async function addUser(req, res, next) {
+
     let error = await checkUserFields(req.body);
     if (error) {
-        return res.status(400).json({ error });
+        return next(createError(400, error));
     }
 
     try {
@@ -36,25 +41,24 @@ async function addUser(req, res) {
     
         // const uniqid = new Date().getTime() + Math.floor(Math.random() * 10000 + 1).toString(16);
         let password;
-        bcrypt.hash(req.body.password, 10, (err, hash) => {
+        bcrypt.hash(req.body.password, 10, async (err, hash) => {
 
             if (err) return next(createError(500, err));
 
             password = hash;
 
             const user = new User({
-                username: sanitize(req.body.username.toLowerCase()),
-                firstname: sanitize(req.body.firstname.toLowerCase()),
                 lastname: sanitize(req.body.lastname.toLowerCase()),
+                firstname: sanitize(req.body.firstname.toLowerCase()),
+                username: sanitize(req.body.username.toLowerCase()),
                 email: sanitize(req.body.email.toLowerCase()),
                 password,
-                image: "default_image.png",
-                language: sanitize(req.body.language.toLowerCase()),
-                // activationKey: uniqid
+                image: `https://avatars.dicebear.com/api/initials/${req.body.firstname}-${req.body.lastname}.svg`
             });
     
             await user.save();
-            return res.status(200).json({ status: "success" });
+            // user.save();
+            return res.status(201).json({ status: "success" });
 
         });
     
